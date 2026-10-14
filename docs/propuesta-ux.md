@@ -195,7 +195,7 @@ flowchart TD
 ├──────────────────────────────────────────────────────────────────────────────┤
 │ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ │ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓ │ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ │
 │ ▓ Producto X (2×2)          ▓ │ ▓ Misión del día▓ │ ▓ Leaderboard (2×2)    ▓ │
-│ ▓ mini-visor 3D             ▓ │ ▓ +250 XP  ▓▓░  ▓ │ ▓ 1. @nova   12 400 XP ▓ │
+│ ▓ mini-visor 3D             ▓ │ ▓ +250 XP  ▓▓░  ▓ │ ▓ 1. @quasar   12 400 XP ▓ │
 │ ▓                           ▓ │ ▓ [Empezar]     ▓ │ ▓ 2. @kai    11 980    ▓ │
 │ ▓                           ▓ ├─────────────────┤ │ ▓ 3. @lumen  10 200    ▓ │
 │ ▓                           ▓ │ ▓ Pregunta a IA ▓ │ ▓ ⏱ Cierra en 2d 14h   ▓ │
@@ -345,7 +345,7 @@ Escritorio: panel lateral derecho 420 px          Móvil: hoja a pantalla comple
 │                 ╭─────╮                                                      │
 │      ╭─────╮    │ 👑  │    ╭─────╮       ← podio 3D (pedestales de cristal)   │
 │      │  2  │    │  1  │    │  3  │                                           │
-│      @kai       @nova      @lumen                                            │
+│      @kai       @quasar      @lumen                                            │
 │     11 980     12 400     10 200                                             │
 ├──────────────────────────────────────────────────────────────────────────────┤
 │  4  @orbit      9 870  ▲2     │  8  @vex       7 420  ▼1                       │
