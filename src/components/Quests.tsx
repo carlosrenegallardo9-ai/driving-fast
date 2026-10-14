@@ -11,31 +11,31 @@ function midnight() {
   return d
 }
 
-function QuestRow({ q }: { q: Quest }) {
+function QuestRow({ q, first }: { q: Quest; first: boolean }) {
   const done = useGame((s) => s.done)
   const prog = questProgress(q, done)
   const complete = !!done[`quest:${q.id}`]
   return (
-    <li className="flex items-center gap-4 rounded-2xl px-4 py-3" style={{ background: complete ? 'rgba(182,255,61,0.05)' : 'rgba(255,255,255,0.025)' }}>
+    <li className="flex items-center gap-4 py-3.5" style={{ borderTop: first ? undefined : '1px solid var(--line-soft)' }}>
       <span
-        className="grid size-6 shrink-0 place-items-center rounded-lg text-xs"
-        style={{ border: `1.5px solid ${complete ? 'var(--xp)' : 'var(--glass-border)'}`, background: complete ? 'var(--xp)' : 'transparent', color: 'var(--bg-0)' }}
+        className="grid size-[22px] shrink-0 place-items-center rounded-full text-[12px]"
+        style={{ border: complete ? 'none' : '1.5px solid var(--line)', background: complete ? 'var(--ink)' : 'transparent', color: 'var(--bg)' }}
         aria-hidden
       >
         {complete && '✓'}
       </span>
       <div className="min-w-0 flex-1">
-        <div className={`text-sm ${complete ? 'text-md line-through decoration-white/20' : 'text-hi'}`}>{q.title}</div>
-        {q.target > 1 && (
-          <div className="mt-1.5 flex items-center gap-2">
-            <div className="h-1 flex-1 overflow-hidden rounded-full bg-white/5">
-              <motion.div className="h-full rounded-full" style={{ background: 'var(--xp)' }} animate={{ width: `${(prog / q.target) * 100}%` }} />
+        <div className={`text-[15px] ${complete ? 'text-ink-3 line-through' : 'text-ink'}`}>{q.title}</div>
+        {q.target > 1 && !complete && (
+          <div className="mt-2 flex items-center gap-2">
+            <div className="h-1 flex-1 overflow-hidden rounded-full" style={{ background: 'var(--line-soft)' }}>
+              <motion.div className="h-full rounded-full" style={{ background: 'var(--ink)' }} animate={{ width: `${(prog / q.target) * 100}%` }} />
             </div>
-            <span className="num text-xs text-lo">{prog}/{q.target}</span>
+            <span className="num text-[12px] text-ink-3">{prog}/{q.target}</span>
           </div>
         )}
       </div>
-      <span className="num shrink-0 text-sm" style={{ color: complete ? 'var(--text-lo)' : 'var(--xp)' }}>+{q.xp}</span>
+      <span className="num shrink-0 text-[15px] text-ink-2">+{q.xp}</span>
     </li>
   )
 }
@@ -49,9 +49,9 @@ function Trivia() {
 
   if (finished) {
     return (
-      <div className="flex h-full flex-col justify-center text-center">
-        <div className="num text-4xl" style={{ color: 'var(--xp)' }}>{correct}/{TRIVIA.length}</div>
-        <p className="mt-2 text-sm text-md">Trivia completada. Vuelve el lunes por la siguiente.</p>
+      <div className="flex h-full flex-col items-center justify-center py-8 text-center">
+        <div className="num text-[56px] leading-none font-semibold text-ink">{correct}/{TRIVIA.length}</div>
+        <p className="mt-3 text-[15px]">Trivia completada. La próxima llega el lunes.</p>
       </div>
     )
   }
@@ -65,12 +65,12 @@ function Trivia() {
   }
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <span className="label">Pregunta {i + 1} de {TRIVIA.length}</span>
-        <span className="num text-xs" style={{ color: 'var(--xp)' }}>+100 c/u</span>
+      <div className="flex items-center justify-between text-[12px] text-ink-3">
+        <span>Pregunta {i + 1} de {TRIVIA.length}</span>
+        <span className="num">+100 XP por acierto</span>
       </div>
-      <p className="mt-3 font-medium text-hi">{t.q}</p>
-      <div className="mt-4 flex flex-col gap-2">
+      <p className="mt-3 text-[19px] leading-snug font-semibold text-ink">{t.q}</p>
+      <div className="mt-5 flex flex-col gap-2">
         {t.options.map((o, k) => {
           const state = picked === null ? null : k === t.answer ? 'ok' : k === picked ? 'bad' : null
           return (
@@ -79,14 +79,17 @@ function Trivia() {
               type="button"
               onClick={() => choose(k)}
               animate={state === 'bad' ? { x: [0, -6, 6, -4, 0] } : {}}
-              className="rounded-xl px-4 py-2.5 text-left text-sm transition-colors hover:bg-white/5"
+              className="flex items-center justify-between rounded-xl px-4 py-3 text-left text-[15px] transition-colors"
               style={{
                 border: '1px solid',
-                borderColor: state === 'ok' ? 'var(--xp)' : state === 'bad' ? 'var(--danger)' : 'var(--glass-border)',
-                color: state === 'ok' ? 'var(--xp)' : state === 'bad' ? 'var(--danger)' : 'var(--text-hi)',
+                borderColor: state === 'ok' ? 'var(--ink)' : 'var(--line)',
+                background: state === 'ok' ? 'var(--ink)' : 'transparent',
+                color: state === 'ok' ? 'var(--bg)' : state === 'bad' ? 'var(--ink-3)' : 'var(--ink)',
+                textDecoration: state === 'bad' ? 'line-through' : undefined,
               }}
             >
               {o}
+              {state === 'ok' && <span aria-label="Correcta">✓</span>}
             </motion.button>
           )
         })}
@@ -100,57 +103,53 @@ export function Quests() {
   const lv = levelFor(xp)
   const days = ['L', 'M', 'X', 'J', 'V', 'S', 'D']
   return (
-    <section id="quests" className="gutter scroll-mt-20 pb-24" aria-labelledby="quests-title">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="label">Gamificación</p>
-            <h2 id="quests-title" className="mt-2 font-display text-4xl font-semibold tracking-tight sm:text-5xl">Tech Quests</h2>
-          </div>
-          <p className="max-w-[44ch] text-md">Cada misión suma XP al ranking de la temporada. Tu nivel no se reinicia nunca.</p>
+    <section id="quests" className="band-alt gutter scroll-mt-11 py-24" aria-labelledby="quests-title">
+      <div className="mx-auto max-w-[1100px]">
+        <div className="text-center">
+          <p className="eyebrow">Gamificación</p>
+          <h2 id="quests-title" className="section-title mt-1">Tech Quests.</h2>
+          <p className="subhead mx-auto mt-3 max-w-[36ch]">Cada misión suma XP al ranking de la temporada. Tu nivel no se reinicia nunca.</p>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-[320px_1fr_1fr]">
-          <div className="glass flex flex-col gap-6 p-6">
-            <div className="flex items-center gap-5">
-              <LevelRing size={88} stroke={6} />
-              <div>
-                <div className="label">Tu nivel</div>
-                <div className="font-display text-3xl font-semibold text-hi">Nivel {lv}</div>
-                <div className="num text-sm text-md">{xp.toLocaleString('es-MX')} / {threshold(lv + 1).toLocaleString('es-MX')} XP</div>
-              </div>
+        <div className="mt-14 grid gap-4 lg:grid-cols-[1fr_1.3fr_1.1fr]">
+          <div className="card flex flex-col gap-8 p-7">
+            <div className="flex flex-col items-center text-center">
+              <LevelRing size={120} stroke={6} />
+              <div className="mt-4 text-[28px] font-semibold text-ink">Nivel {lv}</div>
+              <div className="num text-[15px]">{xp.toLocaleString('es-MX')} de {threshold(lv + 1).toLocaleString('es-MX')} XP</div>
             </div>
             <div>
-              <div className="flex items-center justify-between">
-                <span className="label">Racha</span>
-                <span className="text-sm text-hi">🔥 5 días · ×1.0</span>
+              <div className="flex items-center justify-between text-[15px]">
+                <span className="text-ink">Racha de 5 días</span>
+                <span className="num text-ink-3">×1.0</span>
               </div>
               <div className="mt-3 grid grid-cols-7 gap-1.5">
                 {days.map((d, k) => (
                   <div key={d} className="text-center">
-                    <div className="h-8 rounded-lg" style={{ background: k < 5 ? 'linear-gradient(180deg, #ff9f3d, #ff4d6d)' : 'rgba(255,255,255,0.05)', boxShadow: k === 4 ? '0 0 16px #ff6a3d' : undefined }} />
-                    <span className="label" style={{ fontSize: 10 }}>{d}</span>
+                    <div className="h-7 rounded-md" style={{ background: k < 5 ? 'var(--ink)' : 'var(--line-soft)' }} />
+                    <span className="text-[11px] text-ink-3">{d}</span>
                   </div>
                 ))}
               </div>
-              <p className="mt-3 text-xs text-lo">A los 7 días el multiplicador sube a ×1.5. Tienes 1 escudo de racha esta semana.</p>
+              <p className="mt-3 text-[13px] text-ink-3">A los 7 días tu multiplicador sube a ×1.5. Tienes un escudo de racha esta semana.</p>
             </div>
           </div>
 
-          <div className="glass p-6">
-            <div className="flex items-center justify-between gap-2">
-              <h3 className="font-display text-lg font-semibold">Diarias</h3>
-              <span className="text-xs text-lo">Se renuevan en <Countdown to={midnight()} compact /></span>
+          <div className="card p-7">
+            <div className="flex items-baseline justify-between gap-2">
+              <h3 className="text-[21px] font-semibold">Diarias</h3>
+              <span className="text-[12px] text-ink-3">Se renuevan en <Countdown to={midnight()} compact /></span>
             </div>
-            <ul className="mt-4 flex flex-col gap-2">{QUESTS.filter((q) => q.kind === 'daily').map((q) => <QuestRow key={q.id} q={q} />)}</ul>
-            <h3 className="mt-6 flex items-center justify-between gap-2 font-display text-lg font-semibold">
-              Semanales <span className="text-xs font-normal text-lo">Cierran en <Countdown to={nextMonday()} compact /></span>
-            </h3>
-            <ul className="mt-4 flex flex-col gap-2">{QUESTS.filter((q) => q.kind === 'weekly').map((q) => <QuestRow key={q.id} q={q} />)}</ul>
+            <ul className="mt-2">{QUESTS.filter((q) => q.kind === 'daily').map((q, k) => <QuestRow key={q.id} q={q} first={k === 0} />)}</ul>
+            <div className="mt-6 flex items-baseline justify-between gap-2">
+              <h3 className="text-[21px] font-semibold">Semanales</h3>
+              <span className="text-[12px] text-ink-3">Cierran en <Countdown to={nextMonday()} compact /></span>
+            </div>
+            <ul className="mt-2">{QUESTS.filter((q) => q.kind === 'weekly').map((q, k) => <QuestRow key={q.id} q={q} first={k === 0} />)}</ul>
           </div>
 
-          <div className="glass p-6">
-            <h3 className="mb-4 font-display text-lg font-semibold">Trivia técnica semanal</h3>
+          <div className="card p-7">
+            <h3 className="mb-4 text-[21px] font-semibold">Trivia de la semana</h3>
             <Trivia />
           </div>
         </div>

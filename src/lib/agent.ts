@@ -57,9 +57,9 @@ export function respond(input: string, current: ProductId): { text: string; acti
   if (product !== current || has(s, 'muestra', 'ensena', 'ver ', 'abre', 'abrir')) sceneActions.push({ kind: 'open_product', id: product })
 
   let variant: VariantId | null = null
-  if (has(s, 'ember', 'naranja', 'rojo', 'cobre', 'fuego')) variant = 'ember'
-  else if (has(s, 'glacier', 'blanco', 'plata', 'claro', 'hielo')) variant = 'glacier'
-  else if (has(s, 'obsidian', 'negro', 'oscuro')) variant = 'obsidian'
+  if (has(s, 'blanco', 'claro')) variant = 'blanco'
+  else if (has(s, 'plata', 'gris', 'plateado', 'aluminio')) variant = 'plata'
+  else if (has(s, 'medianoche', 'negro', 'oscuro')) variant = 'medianoche'
   if (variant) {
     sceneActions.push({ kind: 'set_variant', id: variant })
     parts.push(`Listo, ${p.name} en acabado ${VARIANTS.find((v) => v.id === variant)!.name}.`)

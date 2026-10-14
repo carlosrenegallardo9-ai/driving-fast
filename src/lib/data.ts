@@ -1,20 +1,20 @@
 export type ProductId = 'ion-one' | 'ion-pro'
-export type VariantId = 'obsidian' | 'glacier' | 'ember'
+export type VariantId = 'medianoche' | 'plata' | 'blanco'
 export type HotspotId = 'driver' | 'chip' | 'bateria' | 'anillo'
 
 export interface Variant {
   id: VariantId
   name: string
   shell: string
-  accent: string
+  swatch: string
   metalness: number
   roughness: number
 }
 
 export const VARIANTS: Variant[] = [
-  { id: 'obsidian', name: 'Obsidian', shell: '#1a1d24', accent: '#3df5ff', metalness: 0.85, roughness: 0.32 },
-  { id: 'glacier', name: 'Glacier', shell: '#cfd8e6', accent: '#8b9dff', metalness: 0.6, roughness: 0.22 },
-  { id: 'ember', name: 'Ember', shell: '#5a1d10', accent: '#ff6a3d', metalness: 0.75, roughness: 0.38 },
+  { id: 'medianoche', name: 'Medianoche', shell: '#3a3b40', swatch: '#2b2c30', metalness: 0.55, roughness: 0.42 },
+  { id: 'plata', name: 'Plata', shell: '#e3e4e6', swatch: '#e3e4e6', metalness: 0.55, roughness: 0.28 },
+  { id: 'blanco', name: 'Blanco', shell: '#f4f4f1', swatch: '#fafaf8', metalness: 0.02, roughness: 0.6 },
 ]
 
 export interface Product {

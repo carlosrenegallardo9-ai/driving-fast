@@ -90,7 +90,7 @@ export const useGame = create<State>()(
       username: null,
       sound: false,
       product: 'ion-one',
-      variant: 'obsidian',
+      variant: 'plata',
       exploded: false,
       focus: null,
       resetNonce: 0,

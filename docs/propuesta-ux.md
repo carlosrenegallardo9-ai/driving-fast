@@ -35,39 +35,37 @@
 
 ## 1. Dirección visual y sistema de diseño
 
-### 1.1 Concepto: "Neofuturismo de laboratorio"
+### 1.1 Concepto: "Minimalismo de producto" (estilo Apple)
 
-Un estudio oscuro y silencioso donde los productos están iluminados como piezas de museo. Superficies de cristal ahumado, bordes de luz de 1 px, y un único acento cromático que **reacciona** al contexto (color del producto activo, nivel del usuario, estado de la IA).
+> Dirección actualizada en octubre de 2026: se reemplaza el neón oscuro por una paleta monocromática blanca, negra y gris.
 
-### 1.2 Paleta (Dark Mode nativo)
+Bandas a ancho completo que alternan blanco, gris claro y negro. Texto centrado, titulares grandes y cortos, y el producto como imagen principal. El color lo ponen los acabados del producto (Medianoche, Plata, Blanco), no la interfaz.
+
+### 1.2 Paleta
 
 | Token | Valor | Uso |
 |---|---|---|
-| `--bg-0` | `#05060A` | Fondo base (casi negro azulado) |
-| `--bg-1` | `#0B0E15` | Paneles de fondo, secciones |
-| `--glass` | `rgba(22, 27, 38, 0.55)` | Superficie de cristal |
-| `--glass-border` | `rgba(255, 255, 255, 0.08)` | Borde 1 px de cristal |
-| `--text-hi` | `#F2F5FA` | Títulos |
-| `--text-md` | `#A7B0C0` | Cuerpo |
-| `--text-lo` | `#5F6878` | Metadatos |
-| `--accent` | dinámico, por defecto `#3DF5FF` (cian) | Acción primaria, foco, glow |
-| `--accent-2` | `#8B5CFF` (violeta) | Gradientes, IA |
-| `--xp` | `#B6FF3D` (lima) | XP, progreso, recompensas |
-| `--gold` | `#FFC83D` | Top 3, medallas |
-| `--danger` | `#FF4D6D` | Errores, racha en riesgo |
+| `--bg` | `#ffffff` | Fondo principal |
+| `--bg-alt` | `#f5f5f7` | Bandas y tarjetas secundarias |
+| `--ink` | `#1d1d1f` | Titulares y texto principal |
+| `--ink-2` | `#6e6e73` | Texto secundario |
+| `--ink-3` | `#86868b` | Metadatos |
+| `--line` | `#d2d2d7` | Divisores |
+| Banda oscura | `#000000` / `#f5f5f7` | Showroom y bloques destacados; redefine los mismos tokens |
+| `--error` | `#d70015` | Sólo mensajes de error |
 
-**Acento reactivo:** `--accent` se actualiza vía CSS custom property cuando cambia la variante del producto (p. ej. acabado "Ember" → `#FF6A3D`). Todo glow, borde activo y partícula lo hereda con transición de 600 ms.
+El XP, los niveles y el ranking usan el mismo negro y gris: el énfasis viene del tamaño y el peso tipográfico, no del color.
 
 ### 1.3 Tipografía
 
 | Rol | Fuente | Tamaños (desktop / móvil) |
 |---|---|---|
-| Display | **Space Grotesk** 600 | 72 / 44 px, tracking −2 % |
-| Títulos | **Geist** 600 | 40 / 28, 24 / 20 px |
-| Cuerpo | **Geist** 400 | 16 / 16 px, line-height 1.6 |
-| Técnica / datos | **Geist Mono** 500 | 13 px, mayúsculas, tracking +6 % |
+| Display | **SF Pro Display** (sistema) / Inter 600 | 80 / 40 px, tracking −1.5 % |
+| Títulos | SF Pro / Inter 600 | 56 / 32, 21 px |
+| Cuerpo | SF Pro Text / Inter 400 | 17 px, line-height 1.47 |
+| Datos | Misma familia con cifras tabulares | 15–56 px |
 
-Cargadas con `next/font` (self-hosted, `display: swap`, subset latino) para no penalizar LCP.
+En dispositivos Apple se usa la fuente del sistema; en el resto, Inter vía `next/font` (self-hosted, `display: swap`).
 
 ### 1.4 Receta de cristal (Glassmorphism avanzado)
 

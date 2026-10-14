@@ -43,38 +43,35 @@ export function Device({ variant, height, exploded = false, focus = null, showHo
   const mats = useMemo(
     () => ({
       shell: new THREE.MeshStandardMaterial({ color: v.shell, metalness: v.metalness, roughness: v.roughness, transparent: true, side: THREE.DoubleSide }),
-      glass: new THREE.MeshPhysicalMaterial({ color: '#9fb4c8', metalness: 0, roughness: 0.05, transmission: 0.9, thickness: 0.2, transparent: true, opacity: 0.35 }),
+      glass: new THREE.MeshStandardMaterial({ color: '#ffffff', metalness: 0.1, roughness: 0.05, transparent: true, opacity: 0.12, depthWrite: false }),
       dark: new THREE.MeshStandardMaterial({ color: '#15181f', metalness: 0.9, roughness: 0.35 }),
-      battery: new THREE.MeshStandardMaterial({ color: '#1c2a1e', metalness: 0.5, roughness: 0.5, emissive: '#b6ff3d', emissiveIntensity: 0 }),
-      pcb: new THREE.MeshStandardMaterial({ color: '#0d3a2d', metalness: 0.3, roughness: 0.6, emissive: '#3df5ff', emissiveIntensity: 0 }),
-      chip: new THREE.MeshStandardMaterial({ color: '#0a0b0e', metalness: 0.95, roughness: 0.15, emissive: v.accent, emissiveIntensity: 0.4 }),
-      cone: new THREE.MeshStandardMaterial({ color: '#2b2f38', metalness: 0.4, roughness: 0.7, side: THREE.DoubleSide, emissive: '#3df5ff', emissiveIntensity: 0 }),
-      ring: new THREE.MeshStandardMaterial({ color: '#ffffff', emissive: v.accent, emissiveIntensity: 2.2, toneMapped: false }),
+      battery: new THREE.MeshStandardMaterial({ color: '#2a2b2f', metalness: 0.6, roughness: 0.45, emissive: '#ffffff', emissiveIntensity: 0 }),
+      pcb: new THREE.MeshStandardMaterial({ color: '#3a3c42', metalness: 0.5, roughness: 0.5, emissive: '#ffffff', emissiveIntensity: 0 }),
+      chip: new THREE.MeshStandardMaterial({ color: '#0a0b0e', metalness: 0.95, roughness: 0.15 }),
+      cone: new THREE.MeshStandardMaterial({ color: '#2b2c30', metalness: 0.4, roughness: 0.7, side: THREE.DoubleSide, emissive: '#ffffff', emissiveIntensity: 0 }),
+      ring: new THREE.MeshStandardMaterial({ color: '#ffffff', emissive: '#ffffff', emissiveIntensity: 1.4, toneMapped: false }),
     }),
     // los materiales se crean una vez; los colores se interpolan en useFrame
     [],
   )
 
-  const target = useMemo(() => ({ shell: new THREE.Color(), accent: new THREE.Color() }), [])
+  const target = useMemo(() => new THREE.Color(), [])
 
   useFrame((_, dt) => {
-    target.shell.set(v.shell)
-    target.accent.set(v.accent)
+    target.set(v.shell)
     const k = 1 - Math.exp(-6 * dt)
-    mats.shell.color.lerp(target.shell, k)
+    mats.shell.color.lerp(target, k)
     mats.shell.metalness = THREE.MathUtils.lerp(mats.shell.metalness, v.metalness, k)
     mats.shell.roughness = THREE.MathUtils.lerp(mats.shell.roughness, v.roughness, k)
-    mats.ring.emissive.lerp(target.accent, k)
-    mats.chip.emissive.lerp(target.accent, k)
     mats.shell.opacity = THREE.MathUtils.damp(mats.shell.opacity, exploded ? 0.07 : 1, 6, dt)
     mats.shell.depthWrite = mats.shell.opacity > 0.9
 
     const t = performance.now() / 1000
     const pulse = 0.35 + 0.25 * Math.sin(t * 4)
-    mats.battery.emissiveIntensity = focus === 'bateria' ? pulse : 0
-    mats.pcb.emissiveIntensity = focus === 'chip' ? pulse * 0.6 : 0
-    mats.cone.emissiveIntensity = focus === 'driver' ? pulse * 0.5 : 0
-    mats.ring.emissiveIntensity = focus === 'anillo' ? 3 + Math.sin(t * 4) : 2.2
+    mats.battery.emissiveIntensity = focus === 'bateria' ? pulse * 0.5 : 0
+    mats.pcb.emissiveIntensity = focus === 'chip' ? pulse * 0.4 : 0
+    mats.cone.emissiveIntensity = focus === 'driver' ? pulse * 0.35 : 0
+    mats.ring.emissiveIntensity = focus === 'anillo' ? 2.2 + Math.sin(t * 4) : 1.4
 
     layers.forEach((l, i) => {
       const g = refs.current[l.id]
@@ -163,13 +160,15 @@ export function Device({ variant, height, exploded = false, focus = null, showHo
                   type="button"
                   className="hotspot"
                   aria-label={HOTSPOTS[l.hotspot].title}
+                  aria-pressed={focus === l.hotspot}
                   onClick={(e) => { e.stopPropagation(); onHotspot?.(l.hotspot!) }}
-                />
+                >
+                  {focus === l.hotspot ? '−' : '+'}
+                </button>
                 {focus === l.hotspot && (
-                  <div className="glass w-52 p-3 text-left" style={{ borderRadius: 14 }}>
-                    <div className="label" style={{ color: 'var(--accent)' }}>Componente</div>
-                    <div className="text-sm font-semibold text-hi">{HOTSPOTS[l.hotspot].title}</div>
-                    <div className="mt-1 text-xs leading-snug text-md">{HOTSPOTS[l.hotspot].body}</div>
+                  <div className="w-56 rounded-2xl p-3.5 text-left shadow-xl" style={{ background: 'rgba(255,255,255,0.94)', backdropFilter: 'blur(20px)' }}>
+                    <div className="text-[14px] font-semibold" style={{ color: '#1d1d1f' }}>{HOTSPOTS[l.hotspot].title}</div>
+                    <div className="mt-0.5 text-[13px] leading-snug" style={{ color: '#6e6e73' }}>{HOTSPOTS[l.hotspot].body}</div>
                   </div>
                 )}
               </div>

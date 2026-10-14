@@ -17,8 +17,8 @@ function Orb({ size = 56 }: { size?: number }) {
       style={{
         width: size,
         height: size,
-        background: 'radial-gradient(circle at 32% 28%, rgba(255,255,255,0.9), transparent 22%), radial-gradient(circle at 50% 60%, var(--accent), var(--accent-2) 75%)',
-        boxShadow: `0 0 ${busy ? 40 : 24}px -4px var(--accent), inset 0 -6px 16px rgba(0,0,0,0.35)`,
+        background: 'radial-gradient(circle at 34% 28%, #ffffff, rgba(255,255,255,0) 30%), conic-gradient(from 200deg, #1d1d1f, #6e6e73, #d2d2d7, #f5f5f7, #86868b, #1d1d1f)',
+        boxShadow: `0 ${busy ? 10 : 6}px ${busy ? 30 : 18}px rgba(0,0,0,${busy ? 0.3 : 0.22}), inset 0 -4px 10px rgba(0,0,0,0.3)`,
       }}
       animate={
         state === 'thinking' ? { rotate: 360, scale: [1, 0.94, 1] }
@@ -32,7 +32,7 @@ function Orb({ size = 56 }: { size?: number }) {
       }
     >
       {state === 'thinking' && (
-        <span className="absolute -inset-1.5 rounded-full border border-dashed opacity-60" style={{ borderColor: 'var(--accent)' }} />
+        <span className="absolute -inset-1.5 rounded-full border border-dashed opacity-50" style={{ borderColor: '#1d1d1f' }} />
       )}
     </motion.span>
   )
@@ -130,7 +130,7 @@ export function Assistant() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 24, scale: 0.97 }}
             transition={{ type: 'spring', stiffness: 320, damping: 30 }}
-            className="glass fixed z-50 flex flex-col overflow-hidden"
+            className="sheet fixed z-50 flex flex-col overflow-hidden rounded-[22px]"
             style={{
               right: 'calc(env(safe-area-inset-right, 0px) + 12px)',
               left: 'max(12px, env(safe-area-inset-left, 0px))',
@@ -140,15 +140,15 @@ export function Assistant() {
               marginLeft: 'auto',
               maxHeight: 640,
               marginTop: 'auto',
-              background: 'rgba(14, 17, 25, 0.82)',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.22), 0 0 0 1px rgba(0,0,0,0.06)',
             }}
             aria-label="Asistente Nova"
           >
-            <header className="flex items-center gap-3 border-b border-white/5 px-4 py-3">
+            <header className="flex items-center gap-3 px-4 py-3" style={{ borderBottom: '1px solid var(--line-soft)' }}>
               <Orb size={30} />
               <div className="flex-1 leading-tight">
-                <div className="text-sm font-semibold text-hi">Nova</div>
-                <div className="label" style={{ fontSize: 10 }}>
+                <div className="text-[15px] font-semibold text-ink">Nova</div>
+                <div className="text-[12px] text-ink-3">
                   {{ idle: 'Asistente · en línea', thinking: 'Pensando…', speaking: 'Respondiendo…', acting: 'Ejecutando acciones…' }[g.aiState]}
                 </div>
               </div>
@@ -156,32 +156,31 @@ export function Assistant() {
                 type="button"
                 onClick={() => { setVoice(!voice); if (voice) try { speechSynthesis.cancel() } catch { /* sin voz */ } }}
                 aria-pressed={voice}
-                className="rounded-full px-2.5 py-1 text-xs"
-                style={{ border: '1px solid var(--glass-border)', color: voice ? 'var(--accent)' : 'var(--text-md)' }}
+                className="chip min-h-0 px-3 py-1 text-[12px]"
               >
                 Voz {voice ? 'sí' : 'no'}
               </button>
-              <button type="button" onClick={() => g.set({ chatOpen: false })} aria-label="Cerrar asistente" className="grid size-8 place-items-center rounded-full text-md hover:bg-white/5">✕</button>
+              <button type="button" onClick={() => g.set({ chatOpen: false })} aria-label="Cerrar asistente" className="grid size-8 place-items-center rounded-full text-ink-2 hover:bg-black/5">✕</button>
             </header>
 
             <div ref={listRef} className="flex-1 space-y-4 overflow-y-auto px-4 py-4" aria-live="polite">
               {g.messages.map((m) => (
                 <div key={m.id} className={m.role === 'user' ? 'flex justify-end' : ''}>
                   {m.role === 'user' ? (
-                    <div className="max-w-[85%] rounded-2xl rounded-br-md px-4 py-2.5 text-sm text-hi" style={{ background: 'color-mix(in srgb, var(--accent) 16%, transparent)', border: '1px solid color-mix(in srgb, var(--accent) 30%, transparent)' }}>
+                    <div className="max-w-[85%] rounded-[18px] rounded-br-md px-4 py-2.5 text-[15px]" style={{ background: 'var(--solid)', color: 'var(--on-solid)' }}>
                       {m.text}
                     </div>
                   ) : (
-                    <div className="max-w-[92%] text-sm leading-relaxed text-hi">
+                    <div className="max-w-[92%] text-[15px] leading-relaxed text-ink">
                       {m.text}
-                      {!m.done && <span className="ml-0.5 inline-block h-3.5 w-1.5 animate-pulse align-middle" style={{ background: 'var(--accent)' }} />}
+                      {!m.done && <span className="ml-0.5 inline-block h-3.5 w-1.5 animate-pulse align-middle" style={{ background: 'var(--ink)' }} />}
                       {!!m.actions?.length && (
-                        <div className="mt-3 rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)' }}>
-                          <div className="label mb-2" style={{ color: 'var(--accent)', fontSize: 10 }}>Acciones en la página</div>
+                        <div className="mt-3 rounded-xl p-3" style={{ background: 'var(--fill)' }}>
+                          <div className="mb-2 text-[12px] font-semibold text-ink-2">Acciones en la página</div>
                           <ul className="space-y-1">
                             {m.actions.map((a, i) => (
-                              <li key={i} className="flex items-center gap-2 text-xs" style={{ color: a.done ? 'var(--text-hi)' : 'var(--text-lo)' }}>
-                                <span className="grid size-4 place-items-center rounded-full text-[9px]" style={{ background: a.done ? 'var(--xp)' : 'rgba(255,255,255,0.06)', color: 'var(--bg-0)' }}>
+                              <li key={i} className="flex items-center gap-2 text-[13px]" style={{ color: a.done ? 'var(--ink)' : 'var(--ink-3)' }}>
+                                <span className="grid size-4 place-items-center rounded-full text-[9px]" style={{ background: a.done ? 'var(--ink)' : 'var(--line-soft)', color: 'var(--bg)' }}>
                                   {a.done ? '✓' : ''}
                                 </span>
                                 {a.label}
@@ -197,7 +196,7 @@ export function Assistant() {
               {g.aiState === 'thinking' && (
                 <div className="flex gap-1" aria-label="Nova está pensando">
                   {[0, 1, 2].map((i) => (
-                    <motion.span key={i} className="size-1.5 rounded-full" style={{ background: 'var(--accent)' }} animate={{ opacity: [0.2, 1, 0.2] }} transition={{ duration: 1, repeat: Infinity, delay: i * 0.15 }} />
+                    <motion.span key={i} className="size-1.5 rounded-full" style={{ background: 'var(--ink-2)' }} animate={{ opacity: [0.2, 1, 0.2] }} transition={{ duration: 1, repeat: Infinity, delay: i * 0.15 }} />
                   ))}
                 </div>
               )}
@@ -205,12 +204,12 @@ export function Assistant() {
 
             <div className="flex gap-2 overflow-x-auto px-4 pb-2">
               {SUGGESTIONS.map((s) => (
-                <button key={s} type="button" onClick={() => send(s)} disabled={g.aiState !== 'idle'} className="shrink-0 rounded-full px-3 py-1.5 text-xs text-md transition-colors hover:text-hi disabled:opacity-40" style={{ border: '1px solid var(--glass-border)' }}>
+                <button key={s} type="button" onClick={() => send(s)} disabled={g.aiState !== 'idle'} className="chip min-h-8 shrink-0 text-[13px] disabled:opacity-40">
                   {s}
                 </button>
               ))}
             </div>
-            <form onSubmit={submit} className="flex items-center gap-2 border-t border-white/5 p-3">
+            <form onSubmit={submit} className="flex items-center gap-2 p-3" style={{ borderTop: '1px solid var(--line-soft)' }}>
               <label htmlFor="nova-input" className="sr-only">Mensaje para Nova</label>
               <input
                 id="nova-input"
@@ -219,9 +218,10 @@ export function Assistant() {
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Pregunta o pide algo…"
                 autoComplete="off"
-                className="h-11 min-w-0 flex-1 rounded-full bg-white/5 px-4 text-sm text-hi outline-none placeholder:text-lo focus:ring-1 focus:ring-[var(--accent)]"
+                className="h-11 min-w-0 flex-1 rounded-full px-4 text-[15px] text-ink outline-none placeholder:text-ink-3 focus:ring-1 focus:ring-[var(--ink)]"
+                style={{ background: 'var(--fill)' }}
               />
-              <button type="submit" disabled={!input.trim() || g.aiState !== 'idle'} className="btn btn-primary size-11 p-0 disabled:opacity-40" aria-label="Enviar">
+              <button type="submit" disabled={!input.trim() || g.aiState !== 'idle'} className="btn btn-solid size-11 p-0 disabled:opacity-30" aria-label="Enviar">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M5 12h14m-6-6 6 6-6 6" /></svg>
               </button>
             </form>

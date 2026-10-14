@@ -5,9 +5,9 @@ import { useGame } from '../lib/store'
 import { Countdown, nextMonday, nextMonth } from './Countdown'
 
 type Tab = 'weekly' | 'monthly'
-interface Row { name: string; xp: number; me?: boolean; delta: number }
+interface Row { name: string; xp: number; me?: boolean }
 
-/** Simula el canal Realtime: rivales que suman puntos cada pocos segundos. */
+/** Simula el canal en tiempo real: rivales que suman puntos cada pocos segundos. */
 function useLiveRivals() {
   const [gains, setGains] = useState<Record<string, number>>({})
   const [last, setLast] = useState<string | null>(null)
@@ -29,103 +29,73 @@ export function Ranking() {
   const { gains, last } = useLiveRivals()
 
   const rows: Row[] = [
-    ...RIVALS.map((r) => ({ name: r.name, xp: r[tab] + (gains[r.name] ?? 0), delta: gains[r.name] ?? 0 })),
-    { name: username ?? 'tú', xp, me: true, delta: 0 },
+    ...RIVALS.map((r) => ({ name: r.name, xp: r[tab] + (gains[r.name] ?? 0) })),
+    { name: username ?? 'tú', xp, me: true },
   ].sort((a, b) => b.xp - a.xp)
   const myRank = rows.findIndex((r) => r.me) + 1
-  const me = rows[myRank - 1]
   const top10 = rows.slice(0, 10)
-  const podium = [top10[1], top10[0], top10[2]]
   const gap = Math.max(0, rows[9].xp - xp + 1)
 
   return (
-    <section id="ranking" className="gutter scroll-mt-20 pb-24" aria-labelledby="ranking-title">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="label flex items-center gap-2">
-              <span className="relative flex size-2"><span className="absolute inline-flex size-full animate-ping rounded-full opacity-75" style={{ background: 'var(--danger)' }} /><span className="relative inline-flex size-2 rounded-full" style={{ background: 'var(--danger)' }} /></span>
-              En vivo
-            </p>
-            <h2 id="ranking-title" className="mt-2 font-display text-4xl font-semibold tracking-tight sm:text-5xl">Ranking</h2>
+    <section id="ranking" className="band gutter scroll-mt-11 py-24" aria-labelledby="ranking-title">
+      <div className="mx-auto max-w-[880px]">
+        <div className="text-center">
+          <p className="eyebrow flex items-center justify-center gap-2">
+            <span className="relative flex size-2">
+              <span className="absolute inline-flex size-full animate-ping rounded-full opacity-60" style={{ background: 'var(--ink)' }} />
+              <span className="relative inline-flex size-2 rounded-full" style={{ background: 'var(--ink)' }} />
+            </span>
+            En vivo
+          </p>
+          <h2 id="ranking-title" className="section-title mt-1">Ranking.</h2>
+          <div className="mt-8 inline-flex rounded-full p-1" style={{ background: 'var(--fill)' }} role="tablist" aria-label="Temporada">
+            {(['weekly', 'monthly'] as Tab[]).map((t) => (
+              <button key={t} type="button" role="tab" aria-selected={tab === t} onClick={() => setTab(t)}
+                className="relative rounded-full px-6 py-2 text-[15px]"
+                style={{ color: tab === t ? 'var(--on-solid)' : 'var(--ink)' }}>
+                {tab === t && <motion.span layoutId="rank-pill" className="absolute inset-0 rounded-full" style={{ background: 'var(--solid)' }} transition={{ type: 'spring', stiffness: 320, damping: 30 }} />}
+                <span className="relative">{t === 'weekly' ? 'Semanal' : 'Mensual'}</span>
+              </button>
+            ))}
           </div>
-          <div className="flex flex-col items-start gap-2 sm:items-end">
-            <span className="label">{tab === 'weekly' ? 'La semana cierra en' : 'El mes cierra en'}</span>
+          <p className="mt-10 text-[15px]">{tab === 'weekly' ? 'La semana cierra en' : 'El mes cierra en'}</p>
+          <div className="mt-3 flex justify-center">
             <Countdown to={tab === 'weekly' ? nextMonday() : nextMonth()} />
           </div>
         </div>
 
-        <div className="glass overflow-hidden">
-          <div className="flex gap-1 border-b border-white/5 p-2" role="tablist" aria-label="Temporada">
-            {(['weekly', 'monthly'] as Tab[]).map((t) => (
-              <button key={t} type="button" role="tab" aria-selected={tab === t} onClick={() => setTab(t)}
-                className="rounded-full px-4 py-1.5 text-sm transition-colors"
-                style={{ background: tab === t ? 'rgba(255,255,255,0.08)' : 'transparent', color: tab === t ? 'var(--text-hi)' : 'var(--text-md)' }}>
-                {t === 'weekly' ? 'Semanal' : 'Mensual'}
-              </button>
-            ))}
-          </div>
+        <ol className="mt-14">
+          {top10.map((r, k) => (
+            <motion.li
+              layout
+              transition={{ type: 'spring', stiffness: 320, damping: 32 }}
+              key={r.name}
+              className="flex items-center gap-4 py-4"
+              style={{ borderTop: '1px solid var(--line-soft)' }}
+            >
+              <span className={`num w-8 text-ink ${k < 3 ? 'text-[28px] font-semibold' : 'text-[17px] text-ink-3'}`}>{k + 1}</span>
+              <span className={`flex-1 truncate ${k < 3 ? 'text-[21px]' : 'text-[17px]'} ${r.me ? 'font-semibold text-ink' : 'text-ink'}`}>
+                @{r.name}{r.me && ' (tú)'}
+              </span>
+              {last === r.name && (
+                <motion.span key={r.xp} initial={{ opacity: 1, y: 0 }} animate={{ opacity: 0, y: -8 }} transition={{ duration: 2 }} className="text-[12px] text-ink-2">
+                  ▲
+                </motion.span>
+              )}
+              <span className={`num text-ink-2 ${k < 3 ? 'text-[21px]' : 'text-[17px]'}`}>{r.xp.toLocaleString('es-MX')}</span>
+            </motion.li>
+          ))}
+        </ol>
 
-          {/* Podio */}
-          <div className="grid grid-cols-3 items-end gap-2 px-4 pt-8 sm:gap-6 sm:px-10">
-            {podium.map((r, k) => {
-              const place = [2, 1, 3][k]
-              const h = [96, 132, 72][k]
-              return (
-                <motion.div layout key={r.name} className="flex min-w-0 flex-col items-center">
-                  {place === 1 && <span aria-hidden className="mb-1 text-xl">👑</span>}
-                  <span className={`max-w-full truncate text-sm ${r.me ? '' : 'text-hi'}`} style={r.me ? { color: 'var(--xp)' } : undefined}>@{r.name}</span>
-                  <span className="num mb-2 text-xs text-md">{r.xp.toLocaleString('es-MX')}</span>
-                  <div
-                    className="grid w-full place-items-center rounded-t-2xl font-display text-3xl font-semibold"
-                    style={{
-                      height: h,
-                      color: place === 1 ? 'var(--gold)' : 'var(--text-md)',
-                      background: `linear-gradient(180deg, ${place === 1 ? 'rgba(255,200,61,0.18)' : 'rgba(255,255,255,0.06)'}, transparent)`,
-                      borderTop: `1px solid ${place === 1 ? 'var(--gold)' : 'var(--glass-border)'}`,
-                      boxShadow: place === 1 ? '0 -12px 40px -16px var(--gold)' : undefined,
-                    }}
-                  >
-                    {place}
-                  </div>
-                </motion.div>
-              )
-            })}
+        {myRank > 10 && (
+          <div className="sticky z-10 mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 rounded-2xl px-6 py-4" style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 72px)', background: 'var(--solid)', color: 'var(--on-solid)' }}>
+            <span className="num text-[21px] font-semibold">#{myRank}</span>
+            <span>{username ? `@${username}` : 'Tú, sin cuenta'}</span>
+            <span className="num opacity-70">{xp.toLocaleString('es-MX')} XP</span>
+            <span className="ml-auto text-[15px] opacity-80">Te faltan <span className="num">{gap.toLocaleString('es-MX')}</span> XP para el Top 10</span>
           </div>
-
-          {/* 4–10 */}
-          <ol className="grid gap-x-6 border-t border-white/5 px-4 py-3 sm:px-6 md:grid-cols-2">
-            {top10.slice(3).map((r, k) => (
-              <motion.li
-                layout
-                transition={{ type: 'spring', stiffness: 320, damping: 32 }}
-                key={r.name}
-                className="flex items-center gap-3 rounded-xl px-3 py-2.5"
-                style={{ background: r.me ? 'rgba(182,255,61,0.08)' : undefined }}
-              >
-                <span className="num w-6 text-sm text-lo">{k + 4}</span>
-                <span className="flex-1 truncate text-sm" style={{ color: r.me ? 'var(--xp)' : 'var(--text-hi)' }}>@{r.name}</span>
-                {last === r.name && (
-                  <motion.span key={r.xp} initial={{ opacity: 1, y: 0 }} animate={{ opacity: 0, y: -10 }} transition={{ duration: 2 }} className="num text-xs" style={{ color: 'var(--xp)' }}>
-                    ▲
-                  </motion.span>
-                )}
-                <span className="num text-sm text-md">{r.xp.toLocaleString('es-MX')}</span>
-              </motion.li>
-            ))}
-          </ol>
-
-          {/* Fila fija del usuario */}
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t px-6 py-4" style={{ borderColor: 'rgba(182,255,61,0.25)', background: 'rgba(182,255,61,0.06)' }}>
-            <span className="num text-lg" style={{ color: 'var(--xp)' }}>#{myRank}</span>
-            <span className="text-hi">{username ? `@${username}` : 'Tú (sin cuenta)'}</span>
-            <span className="num text-md">{me.xp.toLocaleString('es-MX')} XP</span>
-            <span className="ml-auto text-sm text-md">
-              {myRank <= 10 ? '¡Estás en el Top 10!' : <>Te faltan <span className="num" style={{ color: 'var(--xp)' }}>{gap.toLocaleString('es-MX')} XP</span> para el Top 10</>}
-            </span>
-          </div>
-        </div>
-        <p className="mt-3 text-xs text-lo">Vista previa con jugadores de ejemplo. En producción el ranking se sincroniza en tiempo real con Supabase.</p>
+        )}
+        <p className="mt-6 text-center text-[12px] text-ink-3">Jugadores de ejemplo. En producción el ranking se sincroniza en tiempo real.</p>
       </div>
     </section>
   )
@@ -133,10 +103,10 @@ export function Ranking() {
 
 export function Rewards() {
   const tiers = [
-    { rank: '#1', title: 'Ion Pro Founders Edition', body: 'Hardware exclusivo grabado con tu nombre, fuera de venta.', color: 'var(--gold)' },
-    { rank: '#2 – #3', title: 'Merch edición limitada', body: 'Chaqueta técnica y kit de escritorio numerados.', color: '#c9d4e3' },
-    { rank: '#4 – #10', title: 'Cupón del 20 %', body: 'Válido en cualquier producto durante 60 días.', color: 'var(--accent)' },
-    { rank: 'Top 100', title: 'Insignia coleccionable', body: 'Una medalla única de la temporada para tu vitrina.', color: 'var(--accent-2)' },
+    { rank: '#1', title: 'Ion Pro Founders Edition', body: 'Hardware exclusivo grabado con tu nombre. No está a la venta.' },
+    { rank: '#2 – #3', title: 'Edición limitada', body: 'Chaqueta técnica y kit de escritorio numerados.' },
+    { rank: '#4 – #10', title: 'Cupón del 20 %', body: 'Para cualquier producto durante 60 días.' },
+    { rank: 'Top 100', title: 'Insignia coleccionable', body: 'Una medalla única de la temporada para tu perfil.' },
   ]
   const badges = [
     ['Pionero', 'signup'],
@@ -148,42 +118,48 @@ export function Rewards() {
   ] as const
   const done = useGame((s) => s.done)
   return (
-    <section id="recompensas" className="gutter scroll-mt-20 pb-28" aria-labelledby="rewards-title">
-      <div className="mx-auto max-w-7xl">
-        <p className="label">Ciclo mensual</p>
-        <h2 id="rewards-title" className="mt-2 font-display text-4xl font-semibold tracking-tight sm:text-5xl">Recompensas</h2>
-        <p className="mt-2 max-w-[60ch] text-md">El día 1 de cada mes el ranking vuelve a cero. Los premios se entregan al cierre y tus medallas se quedan para siempre en tu perfil.</p>
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <section id="recompensas" className="band-alt gutter scroll-mt-11 py-24" aria-labelledby="rewards-title">
+      <div className="mx-auto max-w-[1100px]">
+        <div className="text-center">
+          <p className="eyebrow">Ciclo mensual</p>
+          <h2 id="rewards-title" className="section-title mt-1">Recompensas.</h2>
+          <p className="subhead mx-auto mt-3 max-w-[40ch]">El día 1 de cada mes el ranking vuelve a cero. Tus medallas se quedan para siempre.</p>
+        </div>
+        <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {tiers.map((t) => (
-            <div key={t.rank} className="glass p-6">
-              <div className="num text-sm" style={{ color: t.color }}>{t.rank}</div>
-              <h3 className="mt-3 font-display text-xl font-semibold">{t.title}</h3>
-              <p className="mt-2 text-sm text-md">{t.body}</p>
+            <div key={t.rank} className="card p-7">
+              <div className="num text-[15px] text-ink-3">{t.rank}</div>
+              <h3 className="mt-2 text-[21px] leading-tight font-semibold">{t.title}</h3>
+              <p className="mt-2 text-[15px]">{t.body}</p>
             </div>
           ))}
         </div>
-        <div className="glass mt-4 p-6">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <h3 className="font-display text-lg font-semibold">Tu vitrina de medallas</h3>
-            <span className="text-xs text-lo">Se desbloquean con misiones</span>
+        <div className="card mt-4 p-7">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h3 className="text-[21px] font-semibold">Tus medallas</h3>
+            <span className="text-[12px] text-ink-3">Se desbloquean con misiones</span>
           </div>
-          <ul className="mt-5 grid grid-cols-3 gap-4 sm:grid-cols-6">
+          <ul className="mt-6 grid grid-cols-3 gap-6 sm:grid-cols-6">
             {badges.map(([name, key]) => {
               const on = !!done[key]
               return (
                 <li key={name} className="flex flex-col items-center gap-2 text-center">
                   <motion.div
                     initial={false}
-                    animate={on ? { scale: [0.6, 1.15, 1], rotate: [0, -8, 0] } : { scale: 1 }}
-                    className="grid size-16 place-items-center"
+                    animate={on ? { scale: [0.7, 1.1, 1] } : { scale: 1 }}
+                    className="grid size-16 place-items-center rounded-full"
                     style={{
-                      clipPath: 'polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%)',
-                      background: on ? 'linear-gradient(135deg, var(--accent), var(--accent-2))' : 'rgba(255,255,255,0.05)',
+                      background: on ? 'linear-gradient(145deg, #3a3a3c, #1d1d1f)' : 'var(--bg-alt)',
+                      boxShadow: on ? 'inset 0 1px 1px rgba(255,255,255,0.25), 0 4px 12px rgba(0,0,0,0.18)' : 'inset 0 0 0 1px var(--line)',
                     }}
                   >
-                    <span className="text-lg" style={{ color: on ? 'var(--bg-0)' : 'var(--text-lo)' }} aria-hidden>{on ? '★' : '🔒'}</span>
+                    {on ? (
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="#f5f5f7" aria-hidden><path d="m12 2 3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z" /></svg>
+                    ) : (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" strokeWidth="2" aria-hidden><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
+                    )}
                   </motion.div>
-                  <span className={`text-xs ${on ? 'text-hi' : 'text-lo'}`}>{name}</span>
+                  <span className={`text-[12px] ${on ? 'text-ink' : 'text-ink-3'}`}>{name}</span>
                 </li>
               )
             })}

@@ -23,14 +23,17 @@ function useInView<T extends Element>() {
 function Studio() {
   return (
     <>
-      <ambientLight intensity={0.25} />
-      <directionalLight position={[3, 5, 2]} intensity={1.6} />
-      <pointLight position={[-3, 1, -2]} intensity={8} color="#8b5cff" />
+      <ambientLight intensity={0.7} />
+      <directionalLight position={[3, 5, 2]} intensity={1.8} />
+      <directionalLight position={[-4, 2, 4]} intensity={0.8} />
+      <pointLight position={[-3, 1, -2]} intensity={6} color="#ffffff" />
       {/* Entorno generado localmente, sin descargar HDRIs */}
       <Environment resolution={256} frames={1}>
-        <Lightformer form="rect" intensity={3} position={[0, 4, -3]} scale={[8, 2, 1]} />
+        <color attach="background" args={['#9a9ca1']} />
+        <Lightformer form="rect" intensity={4} position={[0, 4, -3]} scale={[8, 2, 1]} />
+        <Lightformer form="rect" intensity={3} position={[0, 2, 5]} scale={[8, 3, 1]} />
         <Lightformer form="rect" intensity={2} position={[-4, 1, 2]} rotation-y={Math.PI / 2} scale={[4, 1, 1]} />
-        <Lightformer form="ring" intensity={1.5} color="#3df5ff" position={[4, 2, 2]} rotation-y={-Math.PI / 2} scale={2} />
+        <Lightformer form="ring" intensity={1.5} position={[4, 2, 2]} rotation-y={-Math.PI / 2} scale={2} />
       </Environment>
     </>
   )
@@ -65,13 +68,13 @@ export function HeroScene() {
     <Frame className="h-full w-full" label="Ion One girando en 3D">
       <Studio />
       <Float speed={1.4} rotationIntensity={0.25} floatIntensity={0.6}>
-        <group rotation={[0.35, 0, 0.08]} scale={1.05}>
+        <group rotation={[0.24, 0, 0.05]} scale={0.92} position={[0, 0.15, 0]}>
           <Spinner>
             <Device variant={variant} height={1} />
           </Spinner>
         </group>
       </Float>
-      <ContactShadows position={[0, -1.35, 0]} opacity={0.5} scale={8} blur={2.6} far={3} />
+      <ContactShadows position={[0, -1.2, 0]} opacity={0.35} scale={8} blur={2.8} far={3} />
     </Frame>
   )
 }
@@ -89,7 +92,7 @@ function CameraRig() {
     const h = PRODUCTS[product].height
     if (focus) {
       const y = focusY(h, focus, exploded)
-      goal.current = { pos: new THREE.Vector3(2.4, y + 0.9, 3.1), target: new THREE.Vector3(0, y, 0) }
+      goal.current = { pos: new THREE.Vector3(3.3, y + 1.3, 4.3), target: new THREE.Vector3(0, y, 0) }
     } else {
       const lift = exploded ? 0.3 * h : 0
       const dist = exploded ? 1.45 + 0.25 * h : 1

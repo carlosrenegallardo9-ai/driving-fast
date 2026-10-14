@@ -1,4 +1,4 @@
-import { lazy, Suspense, type MouseEvent, type ReactNode } from 'react'
+import { lazy, Suspense, type ReactNode } from 'react'
 import { motion } from 'framer-motion'
 import { useGame } from '../lib/store'
 import { scrollTo } from '../lib/execute'
@@ -7,158 +7,172 @@ import { Countdown, nextMonday } from './Countdown'
 
 const HeroScene = lazy(() => import('./Scenes').then((m) => ({ default: m.HeroScene })))
 
-export function Hero() {
+const rise = {
+  initial: { opacity: 0.001, y: 18 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.8, ease: [0.2, 0.8, 0.2, 1] as const },
+}
+
+export function Swatches({ size = 22 }: { size?: number }) {
   const { variant, setVariant } = useGame()
+  const current = VARIANTS.find((v) => v.id === variant)!
   return (
-    <section id="inicio" className="relative overflow-hidden gutter pt-28 pb-10 lg:pt-32">
-      <div className="grid-bg pointer-events-none absolute inset-0" aria-hidden />
-      <div
-        className="pointer-events-none absolute -top-40 right-0 size-[640px] max-w-full rounded-full opacity-30 blur-3xl"
-        style={{ background: 'radial-gradient(circle, var(--accent), transparent 65%)', transition: 'background 0.6s' }}
-        aria-hidden
-      />
-      <div className="relative mx-auto grid max-w-7xl items-center gap-6 lg:grid-cols-[1.05fr_1fr]">
-        <motion.div initial={{ opacity: 0.001, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: [0.2, 0.8, 0.2, 1] }} className="min-w-0">
-          <p className="label mb-5 flex items-center gap-2">
-            <span className="inline-block size-1.5 rounded-full" style={{ background: 'var(--xp)', boxShadow: '0 0 8px var(--xp)' }} />
-            Nuevo · Serie Ion 2026
-          </p>
-          <h1 className="font-display text-[44px] leading-[0.98] font-semibold tracking-[-0.03em] sm:text-6xl lg:text-[80px]">
-            El futuro<br />
-            <span style={{ color: 'var(--accent)', textShadow: '0 0 40px color-mix(in srgb, var(--accent) 50%, transparent)', transition: 'color 0.6s' }}>se puede tocar.</span>
-          </h1>
-          <p className="mt-6 max-w-[46ch] text-lg text-md">
-            Gira, desarma y prueba nuestros equipos en 3D. Pregúntale a Nova lo que quieras y gana XP por cada cosa que descubras.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <button type="button" className="btn btn-primary" onClick={() => scrollTo('showroom')}>Explorar en 3D</button>
-            <button type="button" className="btn" onClick={() => scrollTo('quests')}>Ver misiones</button>
-          </div>
-          <div className="mt-10 flex items-center gap-3">
-            <span className="label">Acabado</span>
-            {VARIANTS.map((v) => (
-              <button
-                key={v.id}
-                type="button"
-                onClick={() => setVariant(v.id)}
-                aria-label={`Acabado ${v.name}`}
-                aria-pressed={variant === v.id}
-                className="size-7 rounded-full transition-transform hover:scale-110"
-                style={{
-                  background: `linear-gradient(135deg, ${v.shell}, ${v.accent})`,
-                  boxShadow: variant === v.id ? `0 0 0 2px var(--bg-0), 0 0 0 3.5px ${v.accent}` : 'inset 0 0 0 1px rgba(255,255,255,0.15)',
-                }}
-              />
-            ))}
-          </div>
-        </motion.div>
-        <div className="relative aspect-square max-h-[560px] w-full max-w-full">
-          <Suspense fallback={<div className="h-full w-full" />}>
-            <HeroScene />
-          </Suspense>
-          <div className="glass absolute bottom-6 left-0 hidden px-4 py-3 sm:block" style={{ borderRadius: 16 }}>
-            <div className="label">Ion One</div>
-            <div className="num text-sm text-hi">20 h · 360° · 8 TOPS</div>
-          </div>
+    <div className="flex flex-col items-center gap-3">
+      <div className="flex items-center gap-3.5" role="radiogroup" aria-label="Acabado">
+        {VARIANTS.map((v) => (
+          <button
+            key={v.id}
+            type="button"
+            role="radio"
+            aria-checked={variant === v.id}
+            aria-label={v.name}
+            onClick={() => setVariant(v.id)}
+            className="rounded-full transition-transform hover:scale-110"
+            style={{
+              width: size,
+              height: size,
+              background: `linear-gradient(145deg, ${v.swatch}, ${v.shell})`,
+              boxShadow: variant === v.id
+                ? '0 0 0 2px var(--bg), 0 0 0 3.5px var(--ink)'
+                : 'inset 0 0 0 1px rgba(0,0,0,0.15), inset 0 1px 2px rgba(255,255,255,0.4)',
+            }}
+          />
+        ))}
+      </div>
+      <span className="text-[12px] text-ink-2">{current.name}</span>
+    </div>
+  )
+}
+
+export function Hero() {
+  return (
+    <section id="inicio" className="band gutter pt-[88px]">
+      <motion.div {...rise} className="mx-auto max-w-[980px] text-center">
+        <p className="eyebrow">Nuevo</p>
+        <h1 className="headline mt-1">Ion One</h1>
+        <p className="subhead mx-auto mt-3 max-w-[30ch]">Sonido en 360°. Inteligencia que vive dentro.</p>
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3.5">
+          <button type="button" className="btn btn-solid" onClick={() => scrollTo('showroom')}>Explorar en 3D</button>
+          <button type="button" className="btn btn-ghost" onClick={() => scrollTo('quests')}>Ver misiones</button>
         </div>
+      </motion.div>
+      <div className="relative mx-auto mt-2 aspect-[16/10] w-full max-w-[980px]">
+        <Suspense fallback={<div className="h-full w-full" />}>
+          <HeroScene />
+        </Suspense>
+      </div>
+      <div className="pb-14">
+        <Swatches />
       </div>
     </section>
   )
 }
 
-/* ---------- Bento ---------- */
-
-function Cell({ children, className = '', onClick, label }: { children: ReactNode; className?: string; onClick?: () => void; label?: string }) {
-  const move = (e: MouseEvent<HTMLElement>) => {
-    const r = e.currentTarget.getBoundingClientRect()
-    e.currentTarget.style.setProperty('--mx', `${e.clientX - r.left}px`)
-    e.currentTarget.style.setProperty('--my', `${e.clientY - r.top}px`)
-  }
-  const Tag = onClick ? 'button' : 'div'
+/* ---------- Banda negra: Ion Pro ---------- */
+export function ProBand() {
+  const setProduct = useGame((s) => s.setProduct)
+  const pro = PRODUCTS['ion-pro']
+  const stats = [
+    ['32 h', 'de batería'],
+    ['24', 'TOPS de IA local'],
+    ['5', 'drivers + subwoofer'],
+  ]
   return (
-    <motion.div whileHover={{ y: -3 }} transition={{ type: 'spring', stiffness: 320, damping: 30 }} className={`min-w-0 ${className}`}>
-      <Tag
-        type={onClick ? 'button' : undefined}
-        onClick={onClick}
-        onMouseMove={move}
-        aria-label={label}
-        className="glass spot flex h-full w-full flex-col p-6 text-left transition-colors"
-      >
-        {children}
-      </Tag>
-    </motion.div>
+    <section className="band-dark gutter py-24 text-center" aria-labelledby="pro-title">
+      <div className="mx-auto max-w-[980px]">
+        <p className="eyebrow">Ion Pro</p>
+        <h2 id="pro-title" className="section-title mx-auto mt-1 max-w-[16ch]">Un estudio entero. En tu escritorio.</h2>
+        <p className="subhead mx-auto mt-4 max-w-[36ch]" style={{ color: 'var(--ink-2)' }}>
+          Desde {pro.price}. Cinco drivers, subwoofer integrado y un chip que procesa tu voz sin salir de casa.
+        </p>
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-6">
+          <button type="button" className="link" onClick={() => { setProduct('ion-pro'); scrollTo('showroom') }}>Míralo por dentro ›</button>
+          <button type="button" className="link" onClick={() => useGame.getState().set({ chatOpen: true })}>Pregúntale a Nova ›</button>
+        </div>
+        <dl className="mx-auto mt-16 grid max-w-[760px] grid-cols-1 gap-10 sm:grid-cols-3">
+          {stats.map(([v, l]) => (
+            <div key={l}>
+              <dt className="sr-only">{l}</dt>
+              <dd className="num text-[56px] leading-none font-semibold" style={{ color: 'var(--ink)' }}>{v}</dd>
+              <dd className="mt-2 text-[17px]">{l}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    </section>
   )
 }
 
-export function Bento() {
-  const { setProduct, set, xp } = useGame()
-  const top = [...RIVALS].sort((a, b) => b.weekly - a.weekly).slice(0, 3)
-  const open = (id: 'ion-one' | 'ion-pro') => { setProduct(id); scrollTo('showroom') }
+/* ---------- Mosaico de accesos ---------- */
+function Tile({ children, onClick, label, dark = false }: { children: ReactNode; onClick: () => void; label: string; dark?: boolean }) {
   return (
-    <section className="gutter pb-24" aria-label="Accesos rápidos">
-      <div className="mx-auto grid max-w-7xl auto-rows-[minmax(180px,auto)] grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Cell className="sm:col-span-2 sm:row-span-2" onClick={() => open('ion-pro')} label="Abrir Ion Pro en el showroom">
-          <div className="label">Producto · {PRODUCTS['ion-pro'].price}</div>
-          <h2 className="mt-2 font-display text-3xl font-semibold tracking-tight">Ion Pro</h2>
-          <p className="mt-1 text-md">{PRODUCTS['ion-pro'].tagline}. Cinco drivers, sub integrado y 32 horas de batería.</p>
-          <div className="relative mt-6 flex flex-1 items-end justify-center">
-            <div className="absolute inset-x-8 bottom-0 top-4 rounded-[50%] opacity-40 blur-2xl" style={{ background: 'radial-gradient(circle, var(--accent), transparent 70%)' }} />
-            <div className="relative grid w-full grid-cols-3 gap-3 pb-2">
-              {PRODUCTS['ion-pro'].specs.slice(0, 3).map(([k, v]) => (
-                <div key={k} className="rounded-2xl p-3" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)' }}>
-                  <div className="label" style={{ fontSize: 10 }}>{k}</div>
-                  <div className="num mt-1 text-[13px] text-hi">{v}</div>
-                </div>
-              ))}
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      className={`${dark ? 'band-dark' : ''} tile group flex min-h-[340px] min-w-0 flex-col items-center px-8 pt-12 pb-10 text-center transition-transform duration-500 hover:scale-[1.01]`}
+      style={dark ? { borderRadius: 28 } : undefined}
+    >
+      {children}
+    </button>
+  )
+}
+
+export function Tiles() {
+  const xp = useGame((s) => s.xp)
+  const top = [...RIVALS].sort((a, b) => b.weekly - a.weekly).slice(0, 3)
+  return (
+    <section className="band gutter py-3" aria-label="Accesos rápidos">
+      <div className="mx-auto grid max-w-[1260px] gap-3 md:grid-cols-2">
+        <Tile onClick={() => useGame.getState().set({ chatOpen: true })} label="Abrir el asistente Nova">
+          <h3 className="text-[40px] leading-tight font-semibold">Nova</h3>
+          <p className="subhead mt-1">Pregunta. Ella te lo muestra.</p>
+          <span className="link mt-3 text-[17px]">Abrir asistente ›</span>
+          <div className="mt-auto flex w-full max-w-[340px] flex-col gap-2 pt-8 text-left text-[15px]">
+            <span className="self-end rounded-2xl px-4 py-2" style={{ background: 'var(--solid)', color: 'var(--on-solid)' }}>¿Cuál tiene más batería?</span>
+            <span className="self-start rounded-2xl px-4 py-2 text-ink" style={{ background: 'var(--card)' }}>El Ion Pro: 32 h. Te enseño la pieza.</span>
+          </div>
+        </Tile>
+        <Tile onClick={() => scrollTo('quests')} label="Ir a Tech Quests" dark>
+          <h3 className="text-[40px] leading-tight font-semibold">Tech Quests</h3>
+          <p className="subhead mt-1" style={{ color: 'var(--ink-2)' }}>Explora. Gana XP. Sube de nivel.</p>
+          <span className="link mt-3 text-[17px]">Ver misiones ›</span>
+          <div className="mt-auto w-full max-w-[320px] pt-8 text-left">
+            <div className="flex items-center justify-between text-[15px] text-ink">
+              <span>Misión del día</span><span className="num">+100 XP</span>
             </div>
+            <div className="mt-3 h-1 overflow-hidden rounded-full" style={{ background: 'var(--line)' }}>
+              <div className="h-full rounded-full" style={{ width: xp > 25 ? '100%' : '10%', background: 'var(--ink)', transition: 'width 0.6s' }} />
+            </div>
+            <p className="mt-2 text-[13px]">Explora un producto en 3D</p>
           </div>
-          <span className="mt-4 text-sm" style={{ color: 'var(--accent)' }}>Ver en 3D →</span>
-        </Cell>
-
-        <Cell onClick={() => scrollTo('quests')} label="Ir a la misión del día">
-          <div className="flex items-center justify-between">
-            <span className="label">Misión del día</span>
-            <span className="num rounded-full px-2 py-0.5 text-xs" style={{ color: 'var(--xp)', background: 'rgba(182,255,61,0.1)' }}>+100 XP</span>
-          </div>
-          <p className="mt-3 font-medium text-hi">Explora un producto en 3D</p>
-          <div className="mt-auto h-1.5 overflow-hidden rounded-full bg-white/5">
-            <div className="h-full rounded-full" style={{ width: xp > 0 ? '100%' : '8%', background: 'var(--xp)', boxShadow: '0 0 12px var(--xp)', transition: 'width 0.6s' }} />
-          </div>
-        </Cell>
-
-        <Cell onClick={() => set({ chatOpen: true })} label="Abrir el asistente Nova">
-          <span className="label">Asistente IA</span>
-          <p className="mt-3 font-medium text-hi">«¿Qué modelo tiene más batería?»</p>
-          <p className="mt-auto text-sm text-md">Nova responde y te lleva a la pieza en 3D.</p>
-        </Cell>
-
-        <Cell className="sm:col-span-2 lg:col-span-1 lg:row-span-2" onClick={() => scrollTo('ranking')} label="Ver ranking completo">
-          <div className="flex items-center justify-between gap-2">
-            <span className="label">Ranking semanal</span>
-            <span className="text-xs"><Countdown to={nextMonday()} compact /></span>
-          </div>
-          <ol className="mt-4 flex flex-col gap-2">
+        </Tile>
+        <Tile onClick={() => scrollTo('ranking')} label="Ver el ranking semanal">
+          <h3 className="text-[40px] leading-tight font-semibold">Ranking</h3>
+          <p className="subhead mt-1">La semana cierra en <Countdown to={nextMonday()} compact /></p>
+          <span className="link mt-3 text-[17px]">Ver clasificación ›</span>
+          <ol className="mt-auto w-full max-w-[320px] pt-8 text-left">
             {top.map((r, i) => (
-              <li key={r.name} className="flex items-center gap-3 rounded-xl px-3 py-2.5" style={{ background: 'rgba(255,255,255,0.03)' }}>
-                <span className="num w-4 text-sm" style={{ color: i === 0 ? 'var(--gold)' : 'var(--text-lo)' }}>{i + 1}</span>
-                <span className="flex-1 truncate text-sm text-hi">@{r.name}</span>
-                <span className="num text-sm text-md">{r.weekly.toLocaleString('es-MX')}</span>
+              <li key={r.name} className="flex items-center gap-3 py-2 text-[15px]" style={{ borderTop: i ? '1px solid var(--line)' : undefined }}>
+                <span className="num w-4 font-semibold text-ink">{i + 1}</span>
+                <span className="flex-1 text-ink">@{r.name}</span>
+                <span className="num">{r.weekly.toLocaleString('es-MX')}</span>
               </li>
             ))}
           </ol>
-          <p className="mt-auto pt-4 text-sm text-md">El #1 del mes gana un Ion Pro edición Founders.</p>
-        </Cell>
-
-        <Cell className="sm:col-span-2" onClick={() => open('ion-one')} label="Abrir Ion One en el showroom">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div className="min-w-0">
-              <div className="label">Producto · {PRODUCTS['ion-one'].price}</div>
-              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight">Ion One</h2>
-              <p className="mt-1 max-w-[38ch] text-md">{PRODUCTS['ion-one'].tagline}. Desármalo capa por capa y mira el chip que corre la IA sin nube.</p>
-            </div>
-            <span className="btn shrink-0">Despiece técnico</span>
+        </Tile>
+        <Tile onClick={() => scrollTo('recompensas')} label="Ver recompensas del mes">
+          <h3 className="text-[40px] leading-tight font-semibold">Recompensas</h3>
+          <p className="subhead mt-1">El #1 del mes se lleva un Ion Pro Founders.</p>
+          <span className="link mt-3 text-[17px]">Ver premios ›</span>
+          <div className="mt-auto flex items-end gap-3 pt-8" aria-hidden>
+            {[48, 72, 40].map((h, i) => (
+              <div key={i} className="flex w-16 items-start justify-center rounded-t-xl pt-2 text-[15px] font-semibold text-ink" style={{ height: h + 30, background: 'var(--card)' }}>
+                {[2, 1, 3][i]}
+              </div>
+            ))}
           </div>
-        </Cell>
+        </Tile>
       </div>
     </section>
   )
